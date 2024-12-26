@@ -6,6 +6,16 @@ echo "Working directory is '$work_dir'"
 
 /usr/bin/git version
 
+if [ ! -d "$current_dir/hassos-build" ]; then
+    mkdir -p $current_dir/hassos-build
+    ln -snf $current_dir/hassos-build /build
+fi
+
+if [ ! -d "$current_dir/hassos-cache" ]; then
+    mkdir -p $current_dir/hassos-cache
+    ln -snf $current_dir/hassos-cache /cache
+fi
+
 # Checkout source
 if [ ! -d "$work_dir" ]; then
     /usr/bin/git clone git@github.com:TianweiiiGe/operating-system.git -b dev-hubv3
@@ -19,8 +29,8 @@ else
 fi
 
 # Build tools
-if [ ! -e "$work_dir/.apt_checked" ]; then
-    touch $work_dir/.apt_checked
+if [ ! -e "$current_dir/.apt_checked" ]; then
+    touch $current_dir/.apt_checked
     apt-get update && apt-get install -y --no-install-recommends \
             bash \
             bc \
@@ -51,9 +61,9 @@ if [ ! -e "$work_dir/.apt_checked" ]; then
 fi
 
 #prepare release key.
-if [ ! -e "$work_dir/key.pem" ]; then
-    openssl req -x509 -newkey rsa:4096 -keyout "$work_dir/key.pem" \
-                -out "$work_dir/cert.pem" -days 3650 -nodes \
+if [ ! -e "$current_dir/hassos-build/key.pem" ]; then
+    openssl req -x509 -newkey rsa:4096 -keyout "$current_dir/hassos-build/key.pem" \
+                -out "$current_dir/hassos-build/cert.pem" -days 3650 -nodes \
                 -subj "/O=ThirdReality/CN=ThirdReality Self-signed Development Certificate"
 fi
 
