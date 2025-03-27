@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+# 停止服务
+if [ "$1" = "remove" ]; then
+    echo "Remove success."
+fi
+
+exit 0

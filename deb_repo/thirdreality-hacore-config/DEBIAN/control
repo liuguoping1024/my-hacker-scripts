@@ -1,0 +1,8 @@
+Package: thirdreality-hacore-config
+Version: 2025.3.4
+Section: utils
+Priority: optional
+Architecture: arm64
+Maintainer: Your Name <guoping.liu@3reality.com>
+Description: A custom hacore-matter-config package, prepare offline installation.
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+# 检查是安装还是升级
+if [ "$1" = "configure" ]; then
+	ln -snf /usr/local/bin/python3.13 /usr/local/bin/python3
+	ln -snf /usr/local/bin/python3.13 /usr/local/bin/python
+
+	ln -snf /usr/local/bin/pip3.13 /usr/local/bin/pip3
+	ln -snf /usr/local/bin/pip3.13 /usr/local/bin/pip
+
+	ln -snf /usr/local/bin/python3.13-config /usr/local/bin/python3-config
+fi
+
+exit 0
+

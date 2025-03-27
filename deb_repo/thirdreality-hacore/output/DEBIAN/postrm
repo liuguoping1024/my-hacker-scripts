@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+# 停止服务
+if [ "$1" = "remove" ]; then
+    rm -rf /tmp/chip_kvs
+    rm -rf /srv/homeassistant
+fi
+
+exit 0

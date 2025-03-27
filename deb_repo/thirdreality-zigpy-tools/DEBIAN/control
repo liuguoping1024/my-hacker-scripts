@@ -1,0 +1,9 @@
+Package: thirdreality-zigpy-tools
+Version: 1.1.0
+Section: utils
+Priority: optional
+Architecture: arm64
+Maintainer: Your Name <guoping.liu@3reality.com>
+Description: A custom home-assistant-zigpy-cli package
+ for quick test for zigpy device.
+

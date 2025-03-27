@@ -1,0 +1,12 @@
+[Unit]
+Description=Home Assistant Core
+After=network-online.target
+
+[Service]
+Type=simple
+Environment=PATH=/srv/homeassistant/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStartPre=/bin/bash -c '[ -f /srv/homeassistant/bin/home_assistant_helper.sh ] && /srv/homeassistant/bin/home_assistant_helper.sh'
+ExecStart=/srv/homeassistant/bin/hass --config /var/lib/homeassistant/homeassistant
+
+[Install]
+WantedBy=multi-user.target

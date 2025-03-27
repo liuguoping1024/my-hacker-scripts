@@ -1,0 +1,8 @@
+Package: thirdreality-python3.13
+Version: 3.13.2
+Section: utils
+Priority: optional
+Architecture: arm64
+Maintainer: Your Name <guoping.liu@3reality.com>
+Description: A custom python3.13 package by thirdreality-python3.13
+ A longer description of the package.

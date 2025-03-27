@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+# 检查是安装还是升级
+if [ "$1" = "configure" ]; then
+	if [ -f "/usr/local/bin/zigpy_help.sh" ]; then
+		chmod +x /usr/local/bin/zigpy_help.sh
+	fi
+fi
+
+exit 0
+
