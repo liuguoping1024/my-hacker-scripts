@@ -1,9 +1,14 @@
 #!/bin/bash
 
-if [ ! -e "/usr/local/bin/python3.13" ]; then
-    echo "python version is not supported"
+[ -f "/usr/bin/python3.13" ] || \
+[ -f "/usr/local/bin/python3.13" ] || \
+[ -f "/usr/local/python3/bin/python3.13" ] || {
+    echo "Error: Python 3.13 not found in any of:" >&2
+    echo "  /usr/bin/python3.13" >&2
+    echo "  /usr/local/bin/python3.13" >&2
+    echo "  /usr/local/python3/bin/python3.13" >&2
     exit 1
-fi
+}
 
 if [[ "$(systemctl is-active home-assistant.service)" == "active" ]]; then
     echo "Stopping home-assistant.service"

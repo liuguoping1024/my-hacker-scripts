@@ -1,9 +1,0 @@
-Package: thirdreality-hacore
-Version: 2025.3.4
-Section: utils
-Priority: optional
-Architecture: arm64
-Maintainer: Your Name <guoping.liu@3reality.com>
-Description: A custom home-assistant-core-matter-server package
- A longer description of the package.
-
