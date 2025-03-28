@@ -1,0 +1,18 @@
+#!/bin/bash
+
+PACKAGE="thirdreality-hassio-config"
+if dpkg -l | grep -q "^ii  $PACKAGE "; then
+  echo "[Warn] $PACKAGE conflict, you should remove $PACKAGE first."
+  exit 1
+fi
+
+[ -f "/usr/bin/python3.13" ] || \
+[ -f "/usr/local/bin/python3.13" ] || \
+[ -f "/usr/local/python3/bin/python3.13" ] || {
+    echo "Error: Python 3.13 not found in any of:" >&2
+    echo "  /usr/bin/python3.13" >&2
+    echo "  /usr/local/bin/python3.13" >&2
+    echo "  /usr/local/python3/bin/python3.13" >&2
+    exit 1
+}
+

@@ -45,9 +45,8 @@ fi
 print_info "Create output directory ..."
 mkdir -p "${output_dir}"
 
-if [ ! -e "${output_dir}/DEBIAN" ]; then
-    cp ${current_dir}/DEBIAN ${output_dir}/ -R
-fi
+print_info "syncing DEBIAN ..."
+cp ${current_dir}/DEBIAN ${output_dir}/ -R
 
 if [ ! -e "/usr/bin/python3" ]; then
     print_info "No Python found, abort ..."

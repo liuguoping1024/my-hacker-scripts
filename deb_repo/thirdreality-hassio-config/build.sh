@@ -57,10 +57,9 @@ print_info "Create output directory ..."
 mkdir -p "${output_dir}"
 mkdir -p "${config_dir}"
 
-if [ ! -e "${output_dir}/DEBIAN" ]; then
-    print_info "syncing DEBIAN ..."
-    cp ${current_dir}/DEBIAN ${output_dir}/ -R
-fi
+print_info "syncing DEBIAN ..."
+cp ${current_dir}/DEBIAN ${output_dir}/ -R
+
 
 if [ ! -d "${config_dir}/homeassistant" ]; then
     cp ${current_dir}/homeassistant/*  "${config_dir}/" -R

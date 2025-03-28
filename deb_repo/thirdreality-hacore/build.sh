@@ -53,14 +53,12 @@ fi
 if [[ "$REBUILD" == true ]]; then
     rm -rf "${output_dir}" > /dev/null 2>&1
     mkdir -p "${output_dir}"
-    cp ${current_dir}/DEBIAN ${output_dir}/ -R
+    
 fi
 
 mkdir -p "${output_dir}"
 
-if [ ! -e "${output_dir}/DEBIAN" ]; then
-    cp ${current_dir}/DEBIAN ${output_dir}/ -R
-fi
+cp ${current_dir}/DEBIAN ${output_dir}/ -R
 
 chip_example_url="https://github.com/home-assistant-libs/matter-linux-ota-provider/releases/download/2024.7.2"
 
@@ -114,8 +112,6 @@ if [ ! -e "${service_path}/bin/hass" ]; then
     mkdir -p /data /updates
     chmod 777 /data /updates
     touch /tmp/chip_kvs && chmod 766 /tmp/chip_kvs || { print_error "Failed to setup directories"; }
-
-
 
     print_info "Using python: ${python3_dir}/bin/python3"
     cd ${service_path}

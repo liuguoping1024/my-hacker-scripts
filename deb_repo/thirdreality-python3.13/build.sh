@@ -60,11 +60,8 @@ fi
 print_info "Create output directory ..."
 mkdir -p "${output_dir}"
 
-if [ ! -e "${output_dir}/DEBIAN" ]; then
-    print_info "Sync DEBIAN ..."
-    cp ${current_dir}/DEBIAN ${output_dir}/ -R
-fi
-
+print_info "Sync DEBIAN ..."
+cp ${current_dir}/DEBIAN ${output_dir}/ -R
 
 dependencies=(
     make 

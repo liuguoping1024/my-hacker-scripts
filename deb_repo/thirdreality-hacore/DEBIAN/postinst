@@ -34,7 +34,15 @@ if [ "$1" = "configure" ]; then
 		chmod +x /srv/homeassistant/bin/home_assistant_helper.sh > /dev/null 2>&1
 	fi
 
-	systemctl daemon-reload
+	/usr/bin/systemctl daemon-reload
+	/usr/bin/systemctl enable home-assistant.service
+	/usr/bin/systemctl enable matter-server.service
+
+	msg=$(iw dev wlan0 link 2>&1)
+    if echo "$msg" | grep -q "Connected"; then
+        /usr/bin/systemctl enable home-assistant.service
+        /usr/bin/systemctl enable matter-server.service
+	fi
 	
 	info "Install success."
 fi

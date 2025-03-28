@@ -10,13 +10,13 @@
     exit 1
 }
 
-if [[ "$(systemctl is-active home-assistant.service)" == "active" ]]; then
+if [[ "$(/usr/bin/systemctl is-active home-assistant.service)" == "active" ]]; then
     echo "Stopping home-assistant.service"
-    systemctl stop home-assistant.service
+    /usr/bin/systemctl stop home-assistant.service
 fi
 
-if [[ "$(systemctl is-active matter-server.service)" == "active" ]]; then
+if [[ "$(/usr/bin/systemctl is-active matter-server.service)" == "active" ]]; then
     echo "Stopping matter-server.service"
-    systemctl stop matter-server.service
+    /usr/bin/systemctl stop matter-server.service
 fi
 
