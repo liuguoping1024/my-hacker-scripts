@@ -20,3 +20,6 @@ if [[ "$(/usr/bin/systemctl is-active matter-server.service)" == "active" ]]; th
     /usr/bin/systemctl stop matter-server.service
 fi
 
+if [[ -e "/srv/homeassistant" ]]; then
+    rm -rf /srv/homeassistant
+fi

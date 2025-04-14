@@ -40,8 +40,8 @@ if [ "$1" = "configure" ]; then
 
 	msg=$(iw dev wlan0 link 2>&1)
     if echo "$msg" | grep -q "Connected"; then
-        /usr/bin/systemctl enable home-assistant.service
-        /usr/bin/systemctl enable matter-server.service
+        /usr/bin/systemctl start home-assistant.service
+        /usr/bin/systemctl start matter-server.service
 	fi
 	
 	info "Install success."

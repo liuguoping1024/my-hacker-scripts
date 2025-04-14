@@ -12,6 +12,12 @@ SCRIPT="ThirdReality"
 print_info() { echo -e "\e[1;34m[${SCRIPT}] INFO:\e[0m $1"; }
 print_error() { echo -e "\e[1;31m[${SCRIPT}] ERROR:\e[0m $1"; }
 
+print_info "Build script for ThirdReality Home Assistant Core"
+print_info "Usage: Build.sh [--rebuild] [--clean]"
+print_info "Options:"
+print_info "  --rebuild: Rebuild the env"
+print_info "  --clean: Clean the output directory and remove the env"
+
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --rebuild) REBUILD=true ;;
@@ -22,8 +28,8 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # 全局定义版本号
-export HOME_ASSISTANT_VERSION="2025.3.4"
-export FRONTEND_VERSION="20250306.0"
+export HOME_ASSISTANT_VERSION="2025.4.2"
+export FRONTEND_VERSION="20250411.0"
 export MATTER_SERVER_VERSION="7.0.0"
 
 CURRENT_PLATFORM=aarch64
@@ -121,7 +127,6 @@ if [ ! -e "${service_path}/bin/hass" ]; then
     pip3 config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
     pip3 config set install.trusted-host pypi.tuna.tsinghua.edu.cn
 
-    
     python3 -m pip install --upgrade pip wheel
     python3 -m pip install python-matter-server[server]=="$MATTER_SERVER_VERSION"
     python3 -m pip install homeassistant=="$HOME_ASSISTANT_VERSION" home-assistant-frontend=="$FRONTEND_VERSION"
@@ -129,7 +134,11 @@ if [ ! -e "${service_path}/bin/hass" ]; then
     # Check it https://github.com/home-assistant/core/blob/master/script/hassfest/docker/Dockerfile
     python3 -m pip install stdlib-list==0.10.0 pipdeptree==2.25.1 tqdm==4.67.1 ruff==0.11.0 \
         PyTurboJPEG==1.7.5 go2rtc-client==0.1.2 ha-ffmpeg==3.2.2 hassil==2.2.3 \
-        home-assistant-intents==2025.3.24 mutagen==1.47.0 pymicro-vad==1.0.1 pyspeex-noise==1.0.2
+        home-assistant-intents==2025.3.28 mutagen==1.47.0 pymicro-vad==1.0.1 pyspeex-noise==1.0.2
+
+    #hardware
+    python3 -m pip install universal-silabs-flasher==0.0.30 ha-silabs-firmware-client==0.2.0 psutil-home-assistant==0.0.1
+    
     python3 -m pip install zigpy-cli==1.1.0
 
     deactivate

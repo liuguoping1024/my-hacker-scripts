@@ -7,12 +7,17 @@ REBUILD=false
 CLEAN=false
 
 PYTHON_VERSION="3.13" # main version
-INSTALL_PYTHON_VERSION="3.13.2" # sub verion
+INSTALL_PYTHON_VERSION="3.13.3" # sub verion
 python3_dir="/usr/local/python3" # install target directory
 
 SCRIPT="ThirdReality"
 print_info() { echo -e "\e[1;34m[${SCRIPT}] INFO:\e[0m $1"; }
 print_error() { echo -e "\e[1;31m[${SCRIPT}] ERROR:\e[0m $1"; }
+
+print_info "Usage: Build.sh [--rebuild] [--clean]"
+print_info "Options:"
+print_info "  --rebuild: Rebuild the env"
+print_info "  --clean: Clean the output directory and remove the env"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -102,7 +107,7 @@ if [[ "$CURRENT_PYTHON" < "3.13.0" ]]; then
         done
     fi
 
-    # https://www.python.org/ftp/python/3.13.2/Python-3.13.2.tgz
+    # https://www.python.org/ftp/python/3.13.3/Python-3.13.3.tgz
     if [ ! -e "${current_dir}/Python-$INSTALL_PYTHON_VERSION.tgz" ]; then
         echo "Downloading Python $INSTALL_PYTHON_VERSION ..."
         download_file "https://www.python.org/ftp/python/$INSTALL_PYTHON_VERSION/Python-$INSTALL_PYTHON_VERSION.tgz" "${current_dir}/Python-$INSTALL_PYTHON_VERSION.tgz"

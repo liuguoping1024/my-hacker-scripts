@@ -11,6 +11,11 @@ SCRIPT="ThirdReality"
 print_info() { echo -e "\e[1;34m[${SCRIPT}] INFO:\e[0m $1"; }
 print_error() { echo -e "\e[1;31m[${SCRIPT}] ERROR:\e[0m $1"; }
 
+print_info "Usage: Build.sh [--rebuild] [--clean]"
+print_info "Options:"
+print_info "  --rebuild: Rebuild the env"
+print_info "  --clean: Clean the output directory and remove the env"
+
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --rebuild) REBUILD=true ;;
