@@ -1,0 +1,31 @@
+#!/bin/bash
+
+if [[ "$(/usr/bin/systemctl is-active otbr-web)" == "active" ]]; then
+    echo "Stopping otbr-web"
+    /usr/bin/systemctl stop otbr-web
+    /usr/bin/systemctl disable otbr-web
+fi
+
+if [[ "$(/usr/bin/systemctl is-active otbr-agent)" == "active" ]]; then
+    echo "Stopping otbr-agent"
+    /usr/bin/systemctl stop otbr-agent
+    /usr/bin/systemctl disable otbr-agent
+fi
+
+if [[ "$(/usr/bin/systemctl is-active otbr-firewall)" == "active" ]]; then
+    echo "Stopping otbr-firewall"
+    /usr/bin/systemctl otbr-firewall
+    /usr/bin/systemctl otbr-firewall
+fi
+
+sudo /usr/bin/systemctl daemon-reload
+
+#sudo apt-get install --no-install-recommends -y wget iproute2 iputils-ping libreadline-dev libncurses-dev
+#sudo apt-get install --no-install-recommends -y build-essential ninja-build cmake
+#sudo apt-get install --no-install-recommends -y rsyslog
+#sudo apt-get install --no-install-recommends -y dbus libdbus-1-dev
+#sudo apt-get install --no-install-recommends -y libavahi-client3 libavahi-common-dev libavahi-client-dev
+#sudo apt-get install --no-install-recommends -y libjsoncpp-dev
+#sudo apt-get install --no-install-recommends -y libnetfilter-queue1 libnetfilter-queue-dev
+#sudo apt-get install -y iptables ipset
+#sudo apt-get install -y libprotobuf-dev protobuf-compiler

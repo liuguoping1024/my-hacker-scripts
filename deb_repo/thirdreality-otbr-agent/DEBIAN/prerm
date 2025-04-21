@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+SYSCTL_ACCEPT_RA_FILE="/etc/sysctl.d/60-otbr-accept-ra.conf"
+readonly SYSCTL_ACCEPT_RA_FILE
+
+
+accept_ra_uninstall()
+{
+    test ! -f $SYSCTL_ACCEPT_RA_FILE || sudo rm -v $SYSCTL_ACCEPT_RA_FILE
+}
+
+
+# 停止服务
+if [ "$1" = "remove" ]; then
+    accept_ra_uninstall
+    echo "Remove success."
+fi
+
+exit 0

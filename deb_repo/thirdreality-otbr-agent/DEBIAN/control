@@ -1,0 +1,8 @@
+Package: thirdreality-otbr-agent
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: arm64
+Maintainer: Your Name <guoping.liu@3reality.com>
+Description: A custom Open Thread Board Router package.
+
