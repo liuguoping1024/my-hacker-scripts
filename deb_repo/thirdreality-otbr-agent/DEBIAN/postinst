@@ -58,6 +58,10 @@ if [ "$1" = "configure" ]; then
 		ln -s -f /etc/init.d/mdns /etc/rc6.d/K16mdns
 	fi
 
+	if [ -f "/etc/nss_mdns.conf" ]; then
+		chmod 444 /etc/nss_mdns.conf
+	fi
+	
 	if [ -f "/etc/init.d/otbr-firewall" ]; then
 		chmod a+x /etc/init.d/otbr-firewall
 		sudo systemctl enable otbr-firewall
@@ -76,7 +80,7 @@ if [ "$1" = "configure" ]; then
 	sudo systemctl daemon-reload
 
     sudo systemctl enable otbr-agent || true
-    sudo systemctl is-enabled otbr-agent || die 'Failed to enable otbr-agent!'
+    sudo systemctl is-enabled otbr-agent || die "Failed to enable otbr-agent!"
 
 	echo "Success"
 fi

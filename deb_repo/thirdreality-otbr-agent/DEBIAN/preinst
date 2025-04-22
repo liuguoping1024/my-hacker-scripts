@@ -14,8 +14,8 @@ fi
 
 if [[ "$(/usr/bin/systemctl is-active otbr-firewall)" == "active" ]]; then
     echo "Stopping otbr-firewall"
-    /usr/bin/systemctl otbr-firewall
-    /usr/bin/systemctl otbr-firewall
+    /usr/bin/systemctl stop otbr-firewall
+    /usr/bin/systemctl disable otbr-firewall
 fi
 
 sudo /usr/bin/systemctl daemon-reload

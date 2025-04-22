@@ -27,81 +27,59 @@ done
 version=$(grep '^Version:' ${current_dir}/DEBIAN/control | awk '{print $2}')
 print_info "Version: $version"
 
-INFRA_IF_NAME="${INFRA_IF_NAME:-wlan0}"
-readonly INFRA_IF_NAME
+FIREWALL_SERVICE=/etc/init.d/otbr-firewall
 
 SYSCTL_ACCEPT_RA_FILE="/etc/sysctl.d/60-otbr-accept-ra.conf"
-readonly SYSCTL_ACCEPT_RA_FILE
-
-DHCPCD_CONF_FILE="/etc/dhcpcd.conf"
-readonly DHCPCD_CONF_FILE
-
-DHCPCD_CONF_BACKUP_FILE="$DHCPCD_CONF_FILE.orig"
-readonly DHCPCD_CONF_BACKUP_FILE
+SYSCTL_IP_FORWARD_FILE="/etc/sysctl.d/60-otbr-ip-forward.conf"
 
 otbr_uninstall()
 {
-    if have systemctl; then
-        sudo systemctl stop otbr-web || true
-        sudo systemctl stop otbr-agent || true
-        sudo systemctl disable otbr-web || true
-        sudo systemctl disable otbr-agent || true
-        ! sudo systemctl is-enabled otbr-web
-        ! sudo systemctl is-enabled otbr-agent
-    fi
+    echo "Stopping otbr-web/otbr-agent/otbr-firewall services ..."
+
+    sudo systemctl stop otbr-web || true
+    sudo systemctl stop otbr-agent || true
+
+    sudo systemctl disable otbr-web || true
+    sudo systemctl disable otbr-agent || true
+
     sudo killall otbr-web otbr-agent || true
 
-    (
-        if cd "${OTBR_TOP_BUILDDIR}"; then
-            # shellcheck disable=SC2024
-            sudo xargs rm <install_manifests.txt || true
-        fi
-    )
-    if have systemctl; then
-        sudo systemctl daemon-reload
+    sudo systemctl stop otbr-firewall || true
+    sudo systemctl disable otbr-firewall || true
+
+    if [ -f "/usr/sbin/update-rc.d" ]; then
+        sudo /usr/sbin/update-rc.d otbr-firewall remove || true
     fi
-}
 
-accept_ra_uninstall()
-{
-    test ! -f $SYSCTL_ACCEPT_RA_FILE || sudo rm -v $SYSCTL_ACCEPT_RA_FILE
-}
+    sudo systemctl daemon-reload
 
-dhcpcd_enable_ipv6rs()
-{
-    if [ -f $DHCPCD_CONF_BACKUP_FILE ]; then
-        sudo cp $DHCPCD_CONF_BACKUP_FILE $DHCPCD_CONF_FILE
-    fi
-}
+    test ! -f ${FIREWALL_SERVICE} || sudo rm ${FIREWALL_SERVICE}
 
-rt_tables_uninstall()
-{
+    test ! -f ${SYSCTL_ACCEPT_RA_FILE} || sudo rm -v ${SYSCTL_ACCEPT_RA_FILE}
+    test ! -f ${SYSCTL_IP_FORWARD_FILE} || sudo rm -v ${SYSCTL_IP_FORWARD_FILE}
+
+    echo "Restoring /etc/iproute2/rt_tables ..."
     sudo sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
+
+    rm -rf /usr/lib/libnss_mdns.so.2
+    rm -rf /usr/lib/libdns_sd.so
+
+    rm -rf /etc/rc2.d/S52mdns 
+	rm -rf /etc/rc2.d/S52mdns
+	rm -rf /etc/rc3.d/S52mdns
+	rm -rf /etc/rc4.d/S52mdns
+	rm -rf /etc/rc5.d/S52mdns
+	rm -rf /etc/rc0.d/K16mdns
+	rm -rf /etc/rc6.d/K16mdns
+
+    echo "Check /etc/sysctl.conf ..."
+    sysctl -p /etc/sysctl.conf
+
+    rm -rf /tmp/mDNSResponder*
+
+    echo "Remove success."
 }
 
-FIREWALL_SERVICE=/etc/init.d/otbr-firewall
-
-firewall_uninstall()
-{
-    if have systemctl; then
-        sudo systemctl stop otbr-firewall || true
-        sudo systemctl disable otbr-firewall || true
-    fi
-    # systemctl disable doesn't remove sym-links
-    if have update-rc.d; then
-        sudo update-rc.d otbr-firewall remove || true
-    fi
-    test ! -f $FIREWALL_SERVICE || sudo rm $FIREWALL_SERVICE
-}
-
-remove_current_otbr_agent()
-{
-    otbr_uninstall
-    accept_ra_uninstall
-    rt_tables_uninstall
-    firewall_uninstall
-    dhcpcd_enable_ipv6rs
-}
 
 if [[ "$CLEAN" == true ]]; then
     rm -rf "${output_dir}" > /dev/null 2>&1
@@ -109,7 +87,7 @@ if [[ "$CLEAN" == true ]]; then
 
     rm -rf "${current_dir}/ot-br-posix"
 
-    remove_current_otbr_agent
+    otbr_uninstall
 
     exit 0
 fi
@@ -128,6 +106,7 @@ print_info "Create output directory ..."
 mkdir -p "${output_dir}"
 
 print_info "syncing DEBIAN ..."
+rm -rf ${output_dir}/DEBIAN > /dev/null 2>&1
 cp ${current_dir}/DEBIAN ${output_dir}/ -R
 
 if [ ! -d "${current_dir}/ot-br-posix" ]; then
@@ -139,9 +118,10 @@ if [ ! -d "${current_dir}/ot-br-posix" ]; then
     cd "${current_dir}/ot-br-posix"; INFRA_IF_NAME=wlan0 WEB_GUI=0 ./script/setup
 
     cp ${current_dir}/otbr-agent /etc/default/
+
+    cat /etc/default/otbr-agent
 fi
 
-# Copy MDNS files
 # find /usr -type f -newermt $(date +'%Y-%m-%d') ! -newermt $(date -d '1 day' +'%Y-%m-%d')
 
 print_info "Copy openthread files ..."
@@ -156,13 +136,45 @@ mkdir -p ${output_dir}/usr/bin/
 mkdir -p ${output_dir}/usr/lib/systemd/system/
 mkdir -p ${output_dir}/usr/include/
 
-cp /usr/lib/libdns_sd.so.1 ${output_dir}/usr/lib/
+if [ -f "/usr/lib/libdns_sd.so.1" ];then 
+    cp /usr/lib/libdns_sd.so.1 ${output_dir}/usr/lib/
+else
+    echo "Error: file /usr/lib/libdns_sd.so.1 is missing!"
+    exit 1
+fi
+
 cp /usr/lib/systemd/system/otbr-agent.service ${output_dir}/usr/lib/systemd/system/
-cp /usr/lib/libnss_mdns-0.2.so ${output_dir}/usr/lib/
-cp /usr/sbin/ot-ctl ${output_dir}/usr/sbin/
-cp /usr/sbin/mdnsd ${output_dir}/usr/sbin/
-cp /usr/sbin/otbr-agent ${output_dir}/usr/sbin/
+
+if [ -f "/usr/lib/libnss_mdns-0.2.so" ];then 
+    cp /usr/lib/libnss_mdns-0.2.so ${output_dir}/usr/lib/
+else
+    echo "Error: file /usr/lib/libnss_mdns-0.2.so is missing!"
+    exit 1
+fi
+
+if [ -f "/usr/sbin/ot-ctl" ];then 
+    cp /usr/sbin/ot-ctl ${output_dir}/usr/sbin/
+else
+    echo "Error: file /usr/sbin/ot-ctl is missing!"
+    exit 1
+fi
+
+if [ -f "/usr/sbin/mdnsd" ];then 
+    cp /usr/sbin/mdnsd ${output_dir}/usr/sbin/
+else
+    echo "Error: file /usr/sbin/mdnsd is missing!"
+    exit 1
+fi
+
+if [ -f "/usr/sbin/otbr-agent" ];then 
+    cp /usr/sbin/otbr-agent ${output_dir}/usr/sbin/
+else
+    echo "Error: file /usr/sbin/otbr-agent is missing!"
+    exit 1
+fi
+
 cp /usr/bin/dns-sd ${output_dir}/usr/sbin/
+cp /usr/include/dns_sd.h ${output_dir}/usr/include/
 
 cp /etc/dbus-1/system.d/otbr-agent.conf ${output_dir}/etc/dbus-1/system.d/
 
@@ -172,22 +184,17 @@ cp /etc/default/otbr-agent ${output_dir}/etc/default/
 cp /etc/sysctl.d/60-otbr-ip-forward.conf ${output_dir}/etc/sysctl.d
 cp /etc/sysctl.d/60-otbr-accept-ra.conf ${output_dir}/etc/sysctl.d
 
+cp /etc/nss_mdns.conf ${output_dir}/etc/
+cp /etc/nsswitch.conf.pre-mdns ${output_dir}/etc/
 # ---------------------
 
-# cp /etc/init.d/otbr-firewall ${output_dir}/etc/init.d/
-# #chmod a+x /etc/init.d/otbr-firewall
-# #systemctl enable otbr-firewall
-
-# # sudo sh -c 'echo "88 openthread" >>/etc/iproute2/rt_tables'
-
-print_info "Start to build obtr_agent_${version}.deb ..."
-dpkg-deb --build ${output_dir} ${current_dir}/obtr_agent_${version}.deb
-
+print_info "Start to build otbr-agent_${version}.deb ..."
+dpkg-deb --build ${output_dir} ${current_dir}/otbr-agent_${version}.deb
 
 rm -rf ${output_dir}/usr > /dev/null 2>&1
-rm -rf ${output_dir}/etcc > /dev/null 2>&1
+rm -rf ${output_dir}/etc > /dev/null 2>&1
 
-print_info "Build obtr_agent_${version}.deb finished ..."
+print_info "Build otbr-agent_${version}.deb finished ..."
 
 
 
