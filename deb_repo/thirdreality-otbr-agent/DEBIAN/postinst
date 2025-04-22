@@ -12,28 +12,28 @@ readonly SYSCTL_IP_FORWARD_FILE
 
 accept_ra_enable()
 {
-    echo 2 | sudo tee /proc/sys/net/ipv6/conf/"${INFRA_IF_NAME}"/accept_ra || die 'Failed to enable IPv6 RA!'
-    echo 64 | sudo tee /proc/sys/net/ipv6/conf/"${INFRA_IF_NAME}"/accept_ra_rt_info_max_plen || die 'Failed to enable IPv6 RIO!'
+    echo 2 | tee /proc/sys/net/ipv6/conf/"${INFRA_IF_NAME}"/accept_ra || die 'Failed to enable IPv6 RA!'
+    echo 64 | tee /proc/sys/net/ipv6/conf/"${INFRA_IF_NAME}"/accept_ra_rt_info_max_plen || die 'Failed to enable IPv6 RIO!'
 }
 
 ipforward_enable()
 {
-    echo 1 | sudo tee /proc/sys/net/ipv6/conf/all/forwarding || die 'Failed to enable IPv6 forwarding!'
-    echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward || die 'Failed to enable IPv4 forwarding!'
+    echo 1 | tee /proc/sys/net/ipv6/conf/all/forwarding || die 'Failed to enable IPv6 forwarding!'
+    echo 1 | tee /proc/sys/net/ipv4/ip_forward || die 'Failed to enable IPv4 forwarding!'
 }
 
 #/etc/sysctl.conf
 #/etc/iproute2/rt_tables
 rt_tables_install()
 {
-    sudo sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
+    sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
 
-    sudo sh -c 'echo "88 openthread" >>/etc/iproute2/rt_tables'
+    echo "88 openthread" >>/etc/iproute2/rt_tables
 
-    sudo sh -c 'echo "" >>/etc/sysctl.conf'
-    sudo sh -c 'echo "# OpenThread configuration" >>/etc/sysctl.conf'
-    sudo sh -c 'echo "net.core.optmem_max=65536" >>/etc/sysctl.conf'
-    sudo sh -c 'sysctl -p /etc/sysctl.conf'
+    echo "" >>/etc/sysctl.conf
+    echo "# OpenThread configuration" >>/etc/sysctl.conf
+    echo "net.core.optmem_max=65536" >>/etc/sysctl.conf
+    sysctl -p /etc/sysctl.conf
 }
 
 # 检查是安装还是升级
@@ -64,8 +64,8 @@ if [ "$1" = "configure" ]; then
 	
 	if [ -f "/etc/init.d/otbr-firewall" ]; then
 		chmod a+x /etc/init.d/otbr-firewall
-		sudo systemctl enable otbr-firewall
-		sudo systemctl start otbr-firewall
+		/usr/bin/systemctl enable otbr-firewall
+		/usr/bin/systemctl start otbr-firewall
 	fi
 
 	# accept_ra_install
@@ -76,11 +76,11 @@ if [ "$1" = "configure" ]; then
 
 	rt_tables_install
 
-	sudo systemctl reload dbus
-	sudo systemctl daemon-reload
+	/usr/bin/systemctl reload dbus
+	/usr/bin/systemctl daemon-reload
 
-    sudo systemctl enable otbr-agent || true
-    sudo systemctl is-enabled otbr-agent || die "Failed to enable otbr-agent!"
+    /usr/bin/systemctl enable otbr-agent || true
+    /usr/bin/systemctl is-enabled otbr-agent || die "Failed to enable otbr-agent!"
 
 	echo "Success"
 fi

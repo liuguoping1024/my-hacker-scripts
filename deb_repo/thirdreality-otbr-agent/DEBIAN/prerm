@@ -10,30 +10,30 @@ SYSCTL_IP_FORWARD_FILE="/etc/sysctl.d/60-otbr-ip-forward.conf"
 if [ "$1" = "remove" ]; then
     echo "Stopping otbr-web/otbr-agent/otbr-firewall services ..."
 
-    sudo systemctl stop otbr-web || true
-    sudo systemctl stop otbr-agent || true
+    /usr/bin/systemctl stop otbr-web || true
+    /usr/bin/systemctl stop otbr-agent || true
 
-    sudo systemctl disable otbr-web || true
-    sudo systemctl disable otbr-agent || true
+    /usr/bin/systemctl disable otbr-web || true
+    /usr/bin/systemctl disable otbr-agent || true
 
-    sudo killall otbr-web otbr-agent || true
+    killall otbr-web otbr-agent || true
 
-    sudo systemctl stop otbr-firewall || true
-    sudo systemctl disable otbr-firewall || true
+    /usr/bin/systemctl stop otbr-firewall || true
+    /usr/bin/systemctl disable otbr-firewall || true
 
     if [ -f "/usr/sbin/update-rc.d" ]; then
-        sudo /usr/sbin/update-rc.d otbr-firewall remove || true
+        /usr/sbin/update-rc.d otbr-firewall remove || true
     fi
 
-    sudo systemctl daemon-reload
+    /usr/bin/systemctl daemon-reload
 
-    test ! -f ${FIREWALL_SERVICE} || sudo rm ${FIREWALL_SERVICE}
+    test ! -f ${FIREWALL_SERVICE} || rm ${FIREWALL_SERVICE}
 
-    test ! -f ${SYSCTL_ACCEPT_RA_FILE} || sudo rm -v ${SYSCTL_ACCEPT_RA_FILE}
-    test ! -f ${SYSCTL_IP_FORWARD_FILE} || sudo rm -v ${SYSCTL_IP_FORWARD_FILE}
+    test ! -f ${SYSCTL_ACCEPT_RA_FILE} || rm -v ${SYSCTL_ACCEPT_RA_FILE}
+    test ! -f ${SYSCTL_IP_FORWARD_FILE} || rm -v ${SYSCTL_IP_FORWARD_FILE}
 
     echo "Restoring /etc/iproute2/rt_tables ..."
-    sudo sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
+    sed -i.bak '/88\s\+openthread/d' /etc/iproute2/rt_tables
 
     rm -rf /lib/libnss_mdns.so.2
     rm -rf /usr/lib/libdns_sd.so
