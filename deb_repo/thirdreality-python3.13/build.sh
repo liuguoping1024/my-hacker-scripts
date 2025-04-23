@@ -7,7 +7,7 @@ REBUILD=false
 CLEAN=false
 
 PYTHON_VERSION="3.13" # main version
-INSTALL_PYTHON_VERSION="3.13.3" # sub verion
+INSTALL_PYTHON_VERSION="3.13.3" # sub verion, for download
 python3_dir="/usr/local/python3" # install target directory
 
 SCRIPT="ThirdReality"
@@ -168,9 +168,9 @@ cp ${python3_dir}/* ${output_dir}/${python3_dir}/ -R
 echo "Strip ${output_dir}/${python3_dir}/bin/python3.13 ..."
 strip ${output_dir}/${python3_dir}/bin/python3.13
 
-echo "Start to build python${PYTHON_VERSION}.deb ..."
-dpkg-deb --build ${output_dir} ${current_dir}/python_${PYTHON_VERSION}.deb
+echo "Start to build python3_${version}.deb ..."
+dpkg-deb --build ${output_dir} ${current_dir}/python3_${version}.deb
 
 rm -rf ${output_dir}/usr/
 
-echo "Build python${PYTHON_VERSION}.deb success ..."
+echo "Build python3_${version}.deb success ..."
