@@ -28,7 +28,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # 全局定义版本号
-export HOME_ASSISTANT_VERSION="2025.4.2"
+export HOME_ASSISTANT_VERSION="2025.4.3"
 export FRONTEND_VERSION="20250411.0"
 export MATTER_SERVER_VERSION="7.0.0"
 
@@ -40,6 +40,12 @@ print_info "Version: $version"
 if [[ "$CLEAN" == true ]]; then
     rm -rf "${output_dir}" > /dev/null 2>&1
     rm -rf ${current_dir}/*.deb > /dev/null 2>&1
+
+    systemctl stop home-assistant.service || true
+    systemctl disable home-assistant.service || true
+
+    systemctl stop matter-server.service || true
+    systemctl disable matter-server.service || true
 
     rm -rf /lib/systemd/system/home-assistant.service
     rm -rf /lib/systemd/system/matter-server.service
@@ -139,6 +145,9 @@ if [ ! -e "${service_path}/bin/hass" ]; then
     #hardware
     python3 -m pip install universal-silabs-flasher==0.0.30 ha-silabs-firmware-client==0.2.0 psutil-home-assistant==0.0.1
     
+    # homeassistant.components.thread
+    python3 -m pip install python-otbr-api==2.7.0 pyroute2==0.7.5
+
     python3 -m pip install zigpy-cli==1.1.0
 
     deactivate
