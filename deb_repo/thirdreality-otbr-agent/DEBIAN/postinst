@@ -38,6 +38,8 @@ rt_tables_install()
 
 # 检查是安装还是升级
 if [ "$1" = "configure" ]; then
+	
+	mkdir -p /var/lib/thread
 
 	if [ -f "/usr/lib/libdns_sd.so.1" ]; then
 		ln -s -f /usr/lib/libdns_sd.so.1 /usr/lib/libdns_sd.so

@@ -1,9 +1,8 @@
 Package: thirdreality-otbr-agent
-Version: 2025.04.22
+Version: 2025.04.24
 Section: utils
 Priority: optional
 Architecture: arm64
 Depends: iptables, ipset, iputils-ping, libprotobuf-lite32
 Maintainer: Your Name <guoping.liu@3reality.com>
 Description: A custom Open Thread Board Router package.
-

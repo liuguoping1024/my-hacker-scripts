@@ -6,6 +6,9 @@ output_dir="${current_dir}/output"
 REBUILD=false
 CLEAN=false
 
+#Fixed to commit
+commit_sha1="bb4252342d521736c2cdad0058ce90f54b35c75c"
+
 SCRIPT="ThirdReality"
 print_info() { echo -e "\e[1;34m[${SCRIPT}] INFO:\e[0m $1"; }
 print_error() { echo -e "\e[1;31m[${SCRIPT}] ERROR:\e[0m $1"; }
@@ -113,6 +116,10 @@ if [ ! -d "${current_dir}/ot-br-posix" ]; then
     /usr/bin/git --version
     /usr/bin/git clone git@github.com:openthread/ot-br-posix.git
 
+    if [ -n "$commit_sha1" ]; then
+        cd "${current_dir}/ot-br-posix"; git checkout "$commit_sha1"
+    fi
+
     # OTBR_VENDOR_NAME="Home Assistant" OTBR_PRODUCT_NAME="OpenThread Border Router"
     cd "${current_dir}/ot-br-posix"; WEB_GUI=0 ./script/bootstrap
     cd "${current_dir}/ot-br-posix"; INFRA_IF_NAME=wlan0 WEB_GUI=0 ./script/setup
@@ -121,6 +128,15 @@ if [ ! -d "${current_dir}/ot-br-posix" ]; then
 
     cat /etc/default/otbr-agent
 fi
+
+cd ${current_dir}/ot-br-posix
+dirty_id=$(/usr/bin/git describe --dirty --always)
+print_info "Record dirty-id '$dirty_id'"
+echo "dirty-id: $dirty_id" >> ${output_dir}/DEBIAN/control
+commit_id=$(git log -1 --format=%H)
+print_info "Record commit-id '$commit_id'"
+echo "commit: $commit_id" >> ${output_dir}/DEBIAN/control
+cd ${current_dir}
 
 # find /usr -type f -newermt $(date +'%Y-%m-%d') ! -newermt $(date -d '1 day' +'%Y-%m-%d')
 
@@ -186,6 +202,7 @@ cp /etc/sysctl.d/60-otbr-accept-ra.conf ${output_dir}/etc/sysctl.d
 
 cp /etc/nss_mdns.conf ${output_dir}/etc/
 cp /etc/nsswitch.conf.pre-mdns ${output_dir}/etc/
+cp /etc/nsswitch.conf ${output_dir}/etc/
 # ---------------------
 
 print_info "Start to build otbr-agent_${version}.deb ..."

@@ -48,6 +48,8 @@ if [ "$1" = "remove" ]; then
 
     sysctl -p /etc/sysctl.conf
 
+    rm -rf /var/lib/thread
+
     echo "Remove success."
 fi
 
