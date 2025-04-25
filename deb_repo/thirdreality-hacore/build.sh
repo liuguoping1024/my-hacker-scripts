@@ -30,7 +30,7 @@ done
 # 全局定义版本号
 export HOME_ASSISTANT_VERSION="2025.4.3"
 export FRONTEND_VERSION="20250411.0"
-export MATTER_SERVER_VERSION="7.0.1"
+export MATTER_SERVER_VERSION="7.0.0"
 
 CURRENT_PLATFORM=aarch64
 
@@ -149,6 +149,9 @@ if [ ! -e "${service_path}/bin/hass" ]; then
     python3 -m pip install python-otbr-api==2.7.0 pyroute2==0.7.5
 
     python3 -m pip install zigpy-cli==1.1.0
+
+    # patch for python-matter-server[server]==7.0.1, dependency will restore to 7.0.0
+    cp ${current_dir}/storage.py /srv/homeassistant/lib/python3.13/site-packages/matter_server/server/storage.py
 
     deactivate
 fi
