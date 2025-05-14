@@ -5,6 +5,7 @@ set -e
 if [ "$1" = "remove" ]; then
     rm -rf /tmp/chip_kvs
     rm -rf /srv/homeassistant
+    rm -rf /srv
 fi
 
 exit 0

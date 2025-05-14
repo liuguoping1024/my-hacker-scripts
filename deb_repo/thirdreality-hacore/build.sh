@@ -3,6 +3,7 @@
 current_dir=$(pwd)
 output_dir="${current_dir}/output"
 service_path="/srv/homeassistant"
+matter_path="/srv/matter_server"
 python3_dir="/usr/local/python3" # install target directory
 
 REBUILD=false
@@ -28,8 +29,12 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # 全局定义版本号
-export HOME_ASSISTANT_VERSION="2025.4.3"
-export FRONTEND_VERSION="20250411.0"
+export HOME_ASSISTANT_VERSION="2025.5.1"
+
+#home-assistant-frontend==20250509.0
+export FRONTEND_VERSION="20250509.0" 
+
+#python-matter-server==7.0.0
 export MATTER_SERVER_VERSION="7.0.0"
 
 CURRENT_PLATFORM=aarch64
@@ -121,6 +126,7 @@ fi
 if [ ! -e "${service_path}/bin/hass" ]; then
     print_info "Building python venv for hacore_${version}.deb ..."
     mkdir -p ${service_path}
+    mkdir -p ${matter_path}
     mkdir -p /data /updates
     chmod 777 /data /updates
     touch /tmp/chip_kvs && chmod 766 /tmp/chip_kvs || { print_error "Failed to setup directories"; }
@@ -139,8 +145,8 @@ if [ ! -e "${service_path}/bin/hass" ]; then
 
     # Check it https://github.com/home-assistant/core/blob/master/script/hassfest/docker/Dockerfile
     python3 -m pip install stdlib-list==0.10.0 pipdeptree==2.25.1 tqdm==4.67.1 ruff==0.11.0 \
-        PyTurboJPEG==1.7.5 go2rtc-client==0.1.2 ha-ffmpeg==3.2.2 hassil==2.2.3 \
-        home-assistant-intents==2025.3.28 mutagen==1.47.0 pymicro-vad==1.0.1 pyspeex-noise==1.0.2
+        PyTurboJPEG==1.7.5 go2rtc-client==0.1.2 ha-ffmpeg==3.2.2 hassil==2.2.3 home-assistant-intents==2025.5.7 \
+        mutagen==1.47.0 pymicro-vad==1.0.1 pyspeex-noise==1.0.2
 
     #hardware
     python3 -m pip install universal-silabs-flasher==0.0.30 ha-silabs-firmware-client==0.2.0 psutil-home-assistant==0.0.1
@@ -149,7 +155,7 @@ if [ ! -e "${service_path}/bin/hass" ]; then
     python3 -m pip install python-otbr-api==2.7.0 pyroute2==0.7.5
 
     python3 -m pip install zigpy-cli==1.1.0
-
+    
     # patch for python-matter-server[server]==7.0.1, dependency will restore to 7.0.0
     cp ${current_dir}/storage.py /srv/homeassistant/lib/python3.13/site-packages/matter_server/server/storage.py
 

@@ -81,8 +81,14 @@ if [ "$1" = "configure" ]; then
 	/usr/bin/systemctl reload dbus
 	/usr/bin/systemctl daemon-reload
 
-    /usr/bin/systemctl enable otbr-agent || true
-    /usr/bin/systemctl is-enabled otbr-agent || die "Failed to enable otbr-agent!"
+	# 检查 GPIO pin 0, 27 的状态
+    if gpioget 0 27; then
+        /usr/bin/systemctl enable otbr-agent || true
+        /usr/bin/systemctl start otbr-agent || die "Failed to start otbr-agent!"
+    else
+        /usr/bin/systemctl disable otbr-agent || true
+        /usr/bin/systemctl stop otbr-agent || die "Failed to stop otbr-agent!"
+    fi
 
 	echo "Success"
 fi

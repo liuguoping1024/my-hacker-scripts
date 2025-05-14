@@ -18,7 +18,7 @@ if [[ "$(/usr/bin/systemctl is-active otbr-firewall)" == "active" ]]; then
     /usr/bin/systemctl disable otbr-firewall
 fi
 
-sudo /usr/bin/systemctl daemon-reload
+/usr/bin/systemctl daemon-reload
 
 #sudo apt-get install --no-install-recommends -y wget iproute2 iputils-ping libreadline-dev libncurses-dev
 #sudo apt-get install --no-install-recommends -y build-essential ninja-build cmake
