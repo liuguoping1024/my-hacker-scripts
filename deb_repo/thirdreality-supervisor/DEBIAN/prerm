@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e
+
+# 停止服务
+if [ "$1" = "remove" ]; then
+    if [[ "$(/usr/bin/systemctl is-active supervisor.service)" == "active" ]]; then
+        echo "Stopping supervisor.service"
+        /usr/bin/systemctl stop supervisor.service
+    fi
+    echo "Remove success."
+fi
+
+exit 0

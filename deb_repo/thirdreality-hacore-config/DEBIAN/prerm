@@ -29,6 +29,9 @@ if [ "$1" = "remove" ]; then
     rm -rf /var/lib/homeassistant/homeassistant/.storage/core.config
     rm -rf /var/lib/homeassistant/homeassistant/.storage/core.analytics
 
+    rm -rf /var/lib/homeassistant/
+    mkdir -p /var/lib/homeassistant/
+    
     echo "Remove success."
 fi
 

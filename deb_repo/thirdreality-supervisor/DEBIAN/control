@@ -1,0 +1,13 @@
+Package: linuxbox-supervisor
+Version: 22.11.1
+Architecture: all
+Maintainer: guoping.liu <guoping.liu@3reality.com>
+Installed-Size: 1
+Section: utils
+Priority: optional
+Description: LinuxBox Supervisor By ThirdReality
+  This package contains the LinuxBox Supervisor for ThirdReality.
+  It is used to manage the LinuxBox and provide various functionalities.
+  .
+  This package is part of the ThirdReality project.
+

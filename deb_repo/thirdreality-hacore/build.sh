@@ -29,10 +29,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # 全局定义版本号
-export HOME_ASSISTANT_VERSION="2025.5.1"
+export HOME_ASSISTANT_VERSION="2025.5.2"
 
 #home-assistant-frontend==20250509.0
-export FRONTEND_VERSION="20250509.0" 
+export FRONTEND_VERSION="20250516.0" 
 
 #python-matter-server==7.0.0
 export MATTER_SERVER_VERSION="7.0.0"
@@ -60,6 +60,9 @@ if [[ "$CLEAN" == true ]]; then
 
     print_info "Removing ${service_path} ..."
     rm -rf ${service_path}
+
+    print_info "Removing ${matter_path} ..."
+    rm -rf ${matter_path}
 
     systemctl daemon-reload
 
@@ -103,6 +106,9 @@ install_ota_provider() {
 CURRENT_PYTHON=$(python3 --version | sed -E 's/Python\s+//')
 if [ -f "${python3_dir}/bin/python3" ]; then
     CURRENT_PYTHON=$("${python3_dir}/bin/python3" --version | sed -E 's/Python\s+//')
+else  
+    print_error "Python 3.13+ is needed, abort ..."
+    exit 1  
 fi
 
 if [[ "$CURRENT_PYTHON" < "3.13.0" ]]; then
@@ -158,6 +164,9 @@ if [ ! -e "${service_path}/bin/hass" ]; then
     
     # patch for python-matter-server[server]==7.0.1, dependency will restore to 7.0.0
     cp ${current_dir}/storage.py /srv/homeassistant/lib/python3.13/site-packages/matter_server/server/storage.py
+
+    # patch for zigbee config display
+    cp ${current_dir}/websocket_api.py /srv/homeassistant/lib/python3.13/site-packages/homeassistant/components/zha/websocket_api.py
 
     deactivate
 fi

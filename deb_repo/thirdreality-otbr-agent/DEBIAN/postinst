@@ -36,6 +36,25 @@ rt_tables_install()
     sysctl -p /etc/sysctl.conf
 }
 
+add_open_thread_entry_to_config() {
+    local config_file="/var/lib/homeassistant/homeassistant/.storage/core.config_entries"
+    local new_entry='{"created_at":"2025-01-01T07:18:49.447764+00:00","data":{"url":"http://localhost:8081"},"disabled_by":null,"discovery_keys":{},"domain":"otbr","entry_id":"01JVKPHNB75FCSNFYPTT7KMVCM","minor_version":1,"modified_at":"2025-01-01T07:18:49.447801+00:00","options":{},"pref_disable_new_entities":false,"pref_disable_polling":false,"source":"user","subentries":[],"title":"Open Thread Border Router","unique_id":"5e339577507d32ff95d5817d60f8d183","version":1}'
+    if [ -f "$config_file" ]; then
+        # Check if the "domain": "otbr" already exists
+        if ! jq -e '.data.entries[] | select(.domain == "otbr")' "$config_file" > /dev/null; then
+            # Use jq to add new entry to the entries list
+            temp_file=$(mktemp)
+            jq --argjson new_entry "$new_entry" '.data.entries += [$new_entry]' "$config_file" > "$temp_file" && mv "$temp_file" "$config_file"
+            echo "New entry added."
+        else
+            echo "Entry with domain 'otbr' already exists. No changes made."
+        fi
+    else
+        echo "Error: Configuration file $config_file not found"
+    fi
+}
+
+
 # 检查是安装还是升级
 if [ "$1" = "configure" ]; then
 	
@@ -78,20 +97,46 @@ if [ "$1" = "configure" ]; then
 
 	rt_tables_install
 
+	chmod +x /usr/lib/thirdreality/hubv3-otbr-agent.sh
+	/usr/bin/systemctl enable hubv3-otbr-agent.service
+	/usr/bin/systemctl disable otbr-agent || true
 	/usr/bin/systemctl reload dbus
 	/usr/bin/systemctl daemon-reload
 
 	# 检查 GPIO pin 0, 27 的状态
     if gpioget 0 27; then
-        /usr/bin/systemctl enable otbr-agent || true
-        /usr/bin/systemctl start otbr-agent || die "Failed to start otbr-agent!"
+		echo "Info: Thread Device is found."
+
+		msg=$(iw dev wlan0 link 2>&1)
+		if echo "$msg" | grep -q "Connected"; then
+			/usr/bin/systemctl start otbr-agent || true
+		fi
+
+		if [ -e "/usr/local/bin/supervisor" ]; then
+			/usr/local/bin/supervisor thread enable
+		fi
+
+		# 如果Home Assistant正在运行，需要停止服务，然后更新配置，再恢复服务
+		if [[ "$(/usr/bin/systemctl is-active home-assistant.service)" == "active" ]]; then
+			echo "Stopping home-assistant.service"
+			/usr/bin/systemctl stop home-assistant.service
+
+			sync
+			add_open_thread_entry_to_config
+			sync
+
+			echo "Restore home-assistant.service"
+			/usr/bin/systemctl start home-assistant.service
+		else
+			echo "Skipping home-assistant.service"
+			add_open_thread_entry_to_config
+			sync
+		fi		
     else
-        /usr/bin/systemctl disable otbr-agent || true
-        /usr/bin/systemctl stop otbr-agent || die "Failed to stop otbr-agent!"
+		echo "Warning: Thread Device is not found !!!"
+        /usr/bin/systemctl stop otbr-agent || true
     fi
 
 	echo "Success"
 fi
-
-exit 0
 

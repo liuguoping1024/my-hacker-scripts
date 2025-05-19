@@ -1,0 +1,16 @@
+[Unit]
+Description=HubV3 otbr agent start service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Environment=PATH=/srv/homeassistant/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/lib/thirdreality/hubv3-otbr-agent.sh
+RemainAfterExit=true
+TimeoutStartSec=180
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

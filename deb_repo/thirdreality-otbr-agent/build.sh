@@ -140,6 +140,13 @@ cd ${current_dir}
 
 # find /usr -type f -newermt $(date +'%Y-%m-%d') ! -newermt $(date -d '1 day' +'%Y-%m-%d')
 
+cp ${current_dir}/otbr-agent /etc/default/otbr-agent
+
+cp ${current_dir}/hubv3-otbr-agent.sh /lib/thirdreality/hubv3-otbr-agent.sh
+cp ${current_dir}/hubv3-otbr-agent.service /lib/systemd/system/hubv3-otbr-agent.service
+
+chmod +x /lib/thirdreality/hubv3-otbr-agent.sh
+
 print_info "Copy openthread files ..."
 
 mkdir -p ${output_dir}/etc/default/
@@ -150,6 +157,7 @@ mkdir -p ${output_dir}/etc/sysctl.d/
 mkdir -p ${output_dir}/usr/sbin/
 mkdir -p ${output_dir}/usr/bin/
 mkdir -p ${output_dir}/usr/lib/systemd/system/
+mkdir -p ${output_dir}/usr/lib/thirdreality/
 mkdir -p ${output_dir}/usr/include/
 
 if [ -f "/usr/lib/libdns_sd.so.1" ];then 
@@ -159,7 +167,10 @@ else
     exit 1
 fi
 
+cp ${current_dir}/hubv3-otbr-agent.sh ${output_dir}/usr/lib/thirdreality/hubv3-otbr-agent.sh
+
 cp /usr/lib/systemd/system/otbr-agent.service ${output_dir}/usr/lib/systemd/system/
+cp /usr/lib/systemd/system/hubv3-otbr-agent.service ${output_dir}/usr/lib/systemd/system/
 
 if [ -f "/usr/lib/libnss_mdns-0.2.so" ];then 
     cp /usr/lib/libnss_mdns-0.2.so ${output_dir}/usr/lib/
@@ -201,8 +212,8 @@ cp /etc/sysctl.d/60-otbr-ip-forward.conf ${output_dir}/etc/sysctl.d
 cp /etc/sysctl.d/60-otbr-accept-ra.conf ${output_dir}/etc/sysctl.d
 
 cp /etc/nss_mdns.conf ${output_dir}/etc/
-cp /etc/nsswitch.conf.pre-mdns ${output_dir}/etc/
-cp /etc/nsswitch.conf ${output_dir}/etc/
+#cp /etc/nsswitch.conf.pre-mdns ${output_dir}/etc/
+#cp /etc/nsswitch.conf ${output_dir}/etc/
 # ---------------------
 
 print_info "Start to build otbr-agent_${version}.deb ..."
