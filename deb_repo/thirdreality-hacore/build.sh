@@ -58,6 +58,8 @@ if [[ "$CLEAN" == true ]]; then
     rm -rf /usr/local/bin/chip-ota-provider-app
     rm -rf /usr/local/bin/zigpy_help.sh
 
+    rm -rf /var/lib/homeassistant/*.* || true
+
     print_info "Removing ${service_path} ..."
     rm -rf ${service_path}
 
