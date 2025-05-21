@@ -143,9 +143,12 @@ cd ${current_dir}
 cp ${current_dir}/otbr-agent /etc/default/otbr-agent
 
 cp ${current_dir}/hubv3-otbr-agent.sh /lib/thirdreality/hubv3-otbr-agent.sh
+cp ${current_dir}/otbr_database /lib/thirdreality/otbr_database
+
 cp ${current_dir}/hubv3-otbr-agent.service /lib/systemd/system/hubv3-otbr-agent.service
 
 chmod +x /lib/thirdreality/hubv3-otbr-agent.sh
+chmod +x /lib/thirdreality/otbr_database
 
 print_info "Copy openthread files ..."
 
@@ -168,6 +171,10 @@ else
 fi
 
 cp ${current_dir}/hubv3-otbr-agent.sh ${output_dir}/usr/lib/thirdreality/hubv3-otbr-agent.sh
+cp ${current_dir}/otbr_database ${output_dir}/usr/lib/thirdreality/otbr_database
+
+chmod +x ${output_dir}/usr/lib/thirdreality/hubv3-otbr-agent.sh
+chmod +x ${output_dir}/usr/lib/thirdreality/otbr_database
 
 cp /usr/lib/systemd/system/otbr-agent.service ${output_dir}/usr/lib/systemd/system/
 cp /usr/lib/systemd/system/hubv3-otbr-agent.service ${output_dir}/usr/lib/systemd/system/

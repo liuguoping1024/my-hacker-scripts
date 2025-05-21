@@ -1,11 +1,10 @@
 #!/srv/homeassistant/bin/python3
 # -*- coding: utf-8 -*-
 
-import aiohttp
 import asyncio
 import json
 import os
-from http import HTTPStatus
+import subprocess
 from datetime import datetime
 import uuid
 
@@ -16,65 +15,162 @@ class GetBorderAgentIdNotSupportedError(OTBRError):
     pass
 
 class OTBR:
-    def __init__(self, url: str, session: aiohttp.ClientSession, timeout: int = 10) -> None:
-        self._session = session
-        self._url = url
+    def __init__(self, timeout: int = 10) -> None:
+        # Set timeout for commands
         self._timeout = timeout
+        self._ot_ctl_path = "/usr/sbin/ot-ctl"
 
     async def get_active_dataset_tlvs(self) -> bytes | None:
-        response = await self._session.get(
-            f"{self._url}/node/dataset/active",
-            headers={"Accept": "text/plain"},
-            timeout=aiohttp.ClientTimeout(total=self._timeout),
-        )
-
-        if response.status == HTTPStatus.NO_CONTENT:
-            return None
-
-        if response.status != HTTPStatus.OK:
-            raise OTBRError(f"unexpected http status {response.status}")
-
         try:
-            return bytes.fromhex(await response.text("ASCII"))
-        except ValueError as exc:
-            raise OTBRError("unexpected API response") from exc
+            # Execute command: /usr/sbin/ot-ctl dataset active -x
+            cmd = [self._ot_ctl_path, "dataset", "active", "-x"]
+            process = subprocess.run(cmd, capture_output=True, text=True, timeout=self._timeout)
+            
+            # Check if command was successful
+            if process.returncode != 0:
+                print(f"Command failed with return code {process.returncode}")
+                print(f"Error: {process.stderr}")
+                
+                # If error, check if we need to initialize the dataset
+                if "error" in process.stdout.lower() or "error" in process.stderr.lower():
+                    print("Dataset may not be initialized. User should run initialization commands.")
+                return None
+                
+            # Process the output
+            data = process.stdout.strip()
+            #print(f"Raw active dataset response: {data}")
+            
+            # Extract the hex string from the output (first line before 'Done')
+            if data:
+                lines = data.split('\n')
+                for line in lines:
+                    if line and line != "Done":
+                        try:
+                            return bytes.fromhex(line.strip())
+                        except ValueError as exc:
+                            continue
+            
+            print("No valid dataset found in response")
+            return None
+                
+        except subprocess.TimeoutExpired:
+            print(f"Command timed out after {self._timeout} seconds")
+            raise OTBRError(f"command timeout after {self._timeout} seconds")
+        except Exception as e:
+            print(f"Error getting active dataset: {e}")
+            raise OTBRError(f"command error: {e}") from e
 
     async def get_border_agent_id(self) -> bytes:
         """Get the border agent ID."""
-        response = await self._session.get(
-            f"{self._url}/node/ba-id",
-            timeout=aiohttp.ClientTimeout(total=self._timeout),
-        )
-
-        if response.status == HTTPStatus.NOT_FOUND:
-            raise GetBorderAgentIdNotSupportedError
-
-        if response.status != HTTPStatus.OK:
-            raise OTBRError(f"unexpected http status {response.status}")
-
         try:
-            return bytes.fromhex(await response.json())
-        except ValueError as exc:
-            raise OTBRError("unexpected API response") from exc
+            # Execute command: /usr/sbin/ot-ctl ba id
+            cmd = [self._ot_ctl_path, "ba", "id"]
+            process = subprocess.run(cmd, capture_output=True, text=True, timeout=self._timeout)
+            
+            # Check if command was successful
+            if process.returncode != 0:
+                print(f"Command failed with return code {process.returncode}")
+                print(f"Error: {process.stderr}")
+                raise GetBorderAgentIdNotSupportedError
+                
+            # Process the output
+            data = process.stdout.strip()
+            #print(f"Raw border agent ID response: {data}")
+            
+            # Extract the hex string from the output (first line before 'Done')
+            if data:
+                lines = data.split('\n')
+                for line in lines:
+                    if line and line != "Done":
+                        try:
+                            return bytes.fromhex(line.strip())
+                        except ValueError as exc:
+                            continue
+            
+            raise OTBRError("No valid border agent ID found in response")
+                
+        except subprocess.TimeoutExpired:
+            print(f"Command timed out after {self._timeout} seconds")
+            raise OTBRError(f"command timeout after {self._timeout} seconds")
+        except Exception as e:
+            print(f"Error getting border agent ID: {e}")
+            raise OTBRError(f"command error: {e}") from e
 
     async def get_extended_address(self) -> bytes:
         """Get extended address (EUI-64).
 
-        Raises if the http status is not 200 or if the response is invalid.
+        Raises if the command fails or if the response is invalid.
         """
-        response = await self._session.get(
-            f"{self._url}/node/ext-address",
-            headers={"Accept": "application/json"},
-            timeout=aiohttp.ClientTimeout(total=self._timeout),
-        )
-
-        if response.status != HTTPStatus.OK:
-            raise OTBRError(f"unexpected http status {response.status}")
-
         try:
-            return bytes.fromhex(await response.json())
-        except ValueError as exc:
-            raise OTBRError("unexpected API response") from exc
+            # Execute command: /usr/sbin/ot-ctl extaddr
+            cmd = [self._ot_ctl_path, "extaddr"]
+            process = subprocess.run(cmd, capture_output=True, text=True, timeout=self._timeout)
+            
+            # Check if command was successful
+            if process.returncode != 0:
+                print(f"Command failed with return code {process.returncode}")
+                print(f"Error: {process.stderr}")
+                raise OTBRError(f"command failed with return code {process.returncode}")
+                
+            # Process the output
+            data = process.stdout.strip()
+            print(f"Raw extended address response: {data}")
+            
+            # Extract the hex string from the output (first line before 'Done')
+            if data:
+                lines = data.split('\n')
+                for line in lines:
+                    if line and line != "Done":
+                        try:
+                            return bytes.fromhex(line.strip())
+                        except ValueError as exc:
+                            continue
+            
+            raise OTBRError("No valid extended address found in response")
+                
+        except subprocess.TimeoutExpired:
+            print(f"Command timed out after {self._timeout} seconds")
+            raise OTBRError(f"command timeout after {self._timeout} seconds")
+        except Exception as e:
+            print(f"Error getting extended address: {e}")
+            raise OTBRError(f"command error: {e}") from e
+
+    async def create_active_dataset(self) -> None:
+        """Initialize and create a new active dataset.
+        
+        This function performs a sequence of OpenThread commands to initialize
+        and activate a new dataset for the Thread network.
+        """
+        commands = [
+            {"step": "Step1: dataset init new", "args": ["dataset", "init", "new"]},
+            {"step": "Step2: dataset", "args": ["dataset"]},
+            {"step": "Step3: dataset commit active", "args": ["dataset", "commit", "active"]},
+            {"step": "Step4: ifconfig up", "args": ["ifconfig", "up"]},
+            {"step": "Step5: thread start", "args": ["thread", "start"]}
+        ]
+        
+        try:
+            for cmd_info in commands:
+                print(f"{cmd_info['step']}")
+                cmd = [self._ot_ctl_path] + cmd_info['args']
+                process = subprocess.run(cmd, capture_output=True, text=True, timeout=self._timeout)
+                
+                # Check if command was successful
+                if process.returncode != 0:
+                    print(f"Command failed with return code {process.returncode}")
+                    print(f"Warn: {process.stderr}")
+                else:
+                    # Process the output
+                    data = process.stdout.strip()
+                    print(f"Command output: {data}")
+                    
+        except subprocess.TimeoutExpired:
+            print(f"Command timed out after {self._timeout} seconds")
+            raise OTBRError(f"command timeout after {self._timeout} seconds")
+        except Exception as e:
+            print(f"Error creating active dataset: {e}")
+            raise OTBRError(f"command error: {e}") from e
+
 
 async def update_thread_core_config(self, border_agent_id) -> int:
     """/var/lib/homeassistant/homeassistant/.storage/core.config_entries"""
@@ -217,40 +313,49 @@ async def update_thread_database(self, border_agent_id, extended_address, active
         return -1  # 失败
 
 async def main():
-    async with aiohttp.ClientSession() as session:
-        otbr_address = "http://localhost:8081"
-        print("otbr_address:", otbr_address)
-        api = OTBR(otbr_address, session, 10)
+    print("Initializing OTBR with command-line interface")
+    api = OTBR(timeout=10)
 
-        try:
-            border_agent_id = await api.get_border_agent_id()
+    try:
+        # Get border agent ID
+        border_agent_id = await api.get_border_agent_id()
+        print("Current border agent ID:", border_agent_id.hex())
+
+        # Get or create active dataset
+        active_dataset = await api.get_active_dataset_tlvs()
+        if active_dataset:
+            print("Current active dataset:", active_dataset.hex())
+        else:
+            print("No active dataset found. Creating new dataset...")
+            await api.create_active_dataset()
             active_dataset = await api.get_active_dataset_tlvs()
-            extended_address = await api.get_extended_address()
+            if active_dataset:
+                print("New active dataset:", active_dataset.hex())
 
-            if active_dataset is None:
-                print("No active operation dataset.")
-            else:
-                print("Current active dataset:", active_dataset.hex())
-                print("Current border agent ID:", border_agent_id.hex())
-                print("Current extended address:", extended_address.hex())
-                
-                # Update configuration files
-                core_config_result = await update_thread_core_config(api, border_agent_id)
-                database_result = await update_thread_database(api, border_agent_id, extended_address, active_dataset)
-                
-                print(f"Update thread core config result: {'Success' if core_config_result == 0 else 'Failed'}") 
-                print(f"Update thread database result: {'Success' if database_result == 0 else 'Failed'}")
-                
-        except OTBRError as e:
-            print(f"OTBR error: {e}")
-        except GetBorderAgentIdNotSupportedError:
-            print("Getting border agent ID is not supported.")
-        except aiohttp.ClientError as e:
-            print(f"Network error: {e}")
-        except asyncio.TimeoutError:
-            print("Request timeout.")
-        except Exception as e:
-            print(f"An error occurred: {e}")
+        # Get extended address
+        extended_address = await api.get_extended_address()
+        print("Current extended address:", extended_address.hex())
+
+        # Update configuration if active dataset exists
+        if active_dataset is None:
+            print("No active operation dataset.")
+        else:
+            # Update configuration files
+            core_config_result = await update_thread_core_config(api, border_agent_id)
+            database_result = await update_thread_database(api, border_agent_id, extended_address, active_dataset)
+          
+            print(f"Update thread core config result: {'Success' if core_config_result == 0 else 'Failed'}") 
+            print(f"Update thread database result: {'Success' if database_result == 0 else 'Failed'}")
+            
+    except OTBRError as e:
+        print(f"OTBR error: {e}")
+    except GetBorderAgentIdNotSupportedError:
+        print("Getting border agent ID is not supported.")
+    except asyncio.TimeoutError:
+        print("Request timeout.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
 
 # 运行异步main函数
 asyncio.run(main())

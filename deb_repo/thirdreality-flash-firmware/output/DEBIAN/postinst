@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+# 检查是安装还是升级
+if [ "$1" = "configure" ]; then
+    if [ -f "/usr/lib/firmware/bl706/bflb_iot" ]; then
+        rm -rf /usr/lib/firmware/bl706/bflb_iot
+    fi
+
+    if [ -f "/usr/lib/firmware/bl706/bl706_func.sh" ]; then
+        chmod +x /usr/lib/firmware/bl706/bl706_func.sh
+    fi
+
+    if [ -f "/usr/lib/firmware/bl706/upgrade_firmware.sh" ]; then
+        chmod +x /usr/lib/firmware/bl706/upgrade_firmware.sh
+    fi    
+fi
+
+exit 0
+

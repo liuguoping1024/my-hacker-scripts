@@ -1,0 +1,7 @@
+Package: thirdreality-flash-firmware
+Version: 2025.05.21
+Section: utils
+Priority: optional
+Architecture: arm64
+Maintainer: guoping.liu <guoping.liu@3reality.com>
+Description: A tool for update bl702/bl706 zigbee/thread firmware

@@ -1,5 +1,5 @@
 Package: thirdreality-otbr-agent
-Version: 2025.05.20
+Version: 2025.05.21
 Section: utils
 Priority: optional
 Architecture: arm64

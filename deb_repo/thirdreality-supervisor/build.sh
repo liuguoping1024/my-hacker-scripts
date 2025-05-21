@@ -74,7 +74,6 @@ mkdir -p "${output_dir}/lib/systemd/system"
 mkdir -p "${output_dir}/lib/armbian"
 mkdir -p "${output_dir}/lib/thirdreality"
 
-
 cp -r "${supervised_dir}/supervisor" "${output_dir}/usr/local/lib/python3.11/dist-packages"
 cp "${supervised_dir}/bin/supervisor" "${output_dir}/usr/local/bin/"
 chmod +x "${output_dir}/usr/local/bin/supervisor"
@@ -82,10 +81,11 @@ chmod +x "${output_dir}/usr/local/bin/supervisor"
 cp "${supervised_dir}/supervisor.service" "${output_dir}/etc/systemd/system/"
 
 cp "${current_dir}/factory-reset.sh" "${output_dir}/lib/armbian/"
-cp "${current_dir}/hubv3-usb-sync.sh" "${output_dir}/lib/thirdreality/"
-
 chmod +x "${output_dir}/lib/armbian/factory-reset.sh"
-chmod +x "${output_dir}/lib/thirdreality/hubv3-usb-sync.sh"
+
+# rename the file to avoid conflict
+cp "${current_dir}/hubv3-usb-sync.sh" "${output_dir}/lib/thirdreality/hubv3-usb-sync-latest.sh"
+chmod +x "${output_dir}/lib/thirdreality/hubv3-usb-sync-latest.sh"
 
 print_info "Start to build linuxbox-supervisor_${version}.deb ..."
 dpkg-deb --build ${output_dir} ${current_dir}/linuxbox-supervisor_${version}.deb
